@@ -3,30 +3,16 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
+const { log } = require("console");
 const app = express();
 const port = 3005;
 
 app.use(cors()); //güvenlik için
 app.use(express.json());
 
-// urlde /web/asset/... diye istek gelirse gelen isteği alma
-app.get("/web/assets/:input", (req, res) => {
-  if (req.params.input == "style.css") {
-    // web/assets/style.css dosyasını gönder
-    res.sendFile(path.join(__dirname, "web/assets/style.css"), {
-      //headersinni text/css yap
-      headers: { "Content-Type": "text/css" },
-    });
-  }
-  //gelen istek style.css e eşitse(js e eşitse)
-  else {
-    //web/assets/script.js dosyasını gönder
-    res.sendFile(path.join(__dirname, "web/assets/scriot.js"), {
-      //headersinni text/js yap
-      headers: { "Content-Type": "text/js" },
-    });
-  }
-});
+//static dosyalaar (Web Klasörü)
+
+app.use(express.static("web"));
 
 // urlde herhangi bir istek gelmezse
 app.get("/", (req, res) => {
@@ -54,31 +40,40 @@ app.get("/", (req, res) => {
 });
 
 //  arkplanda /wsubmit diye istek gönderilirse
-app.post("/submit", (req, res) => {
+app.post("/convert", (req, res) => {
   //boyd'de value ve type diye tamınlanan verileri konsola yazdır
   console.log(req.body.value);
-  console.log(req.body.type);
+  console.log(req.body.sourceType);
+  console.log(req.body.destType);
   //geri dönderilicek mesahın tutulmasın için değişken
   let message = "";
 
-  //body'den gelen type verisi ascii ye eşitse
-  if (req.body.type == "ascii") {
-    //message değişkenini asciiToBinar fonkisyonuna gönderilen value bilgisinin karşılığını ata
-    message = asciiToBinary(req.body.value).toString();
+  if (req.body.sourceType == "binary" && req.body.destType == "ascii") {
+    message = binaryToAscii(req.body.value).toString();
+  }
+  if (req.body.sourceType == "binary" && req.body.destType == "octal") {
+    message = binaryToOctal(req.body.value).toString();
   }
 
-  //body'den gelen type verisi binary ye eşitse
-  if (req.body.type == "binary") {
-    //message değişkenini binaryToAcsii fonkisyonuna gönderilen value bilgisinin karşılığını ata
-    message = binaryToAscii(req.body.value).toString();
+  if (req.body.sourceType == "ascii" && req.body.destType == "binary") {
+    message = asciiToBinary(req.body.value).toString();
+  }
+  if (req.body.sourceType == "ascii" && req.body.destType == "octal") {
+    message = asciiToOctal(req.body.value).toString();
+  }
+
+  if (req.body.sourceType == "octal" && req.body.destType == "binary") {
+    message = octalToBinary(req.body.value).toString();
+  }
+  if (req.body.sourceType == "octal" && req.body.destType == "ascii") {
+    message = octalToAscii(req.body.value).toString();
   }
 
   //message değişkenini karşı tarafa gönder
   res.send({ message });
-//message: "Success!"i karşı tarafa gönder
+  //message: "Success!"i karşı tarafa gönder
   res.send({ message: "Success!" });
 });
-
 
 //sunucuyu dinlemeye başla
 app.listen(port, () => {
@@ -87,18 +82,55 @@ app.listen(port, () => {
 });
 
 function asciiToBinary(str) {
-  var result = [];
-  for (var i = 0; i < str.length; i++) {
-    result.push(str.charCodeAt(i).toString(2));
+  let binary = "";
+  for (let i = 0; i < str.length; i++) {
+    let ascii = str.charCodeAt(i);
+    let binaryDigit = ascii.toString(2);
+    binary += ("00000000" + binaryDigit).slice(-8); // 8 bitlik tamamlama
   }
-  return result.join(" ");
+  return binary;
 }
 
 function binaryToAscii(binary) {
-  binary = binary.split(" ");
-  var result = "";
-  for (var i = 0; i < binary.length; i++) {
-    result += String.fromCharCode(parseInt(binary[i], 2));
+  let str = "";
+  for (let i = 0; i < binary.length; i += 8) {
+    let binaryDigit = binary.substr(i, 8);
+    let ascii = parseInt(binaryDigit, 2);
+    str += String.fromCharCode(ascii);
   }
-  return result;
+  return str;
+}
+
+function asciiToOctal(str) {
+  let octal = "";
+  for (let i = 0; i < str.length; i++) {
+    let ascii = str.charCodeAt(i);
+    let octalDigit = ascii.toString(8);
+    octal += ("000" + octalDigit).slice(-3); // 3 bitlik tamamlama
+  }
+  return octal;
+}
+
+function octalToAscii(octal) {
+  let str = "";
+  for (let i = 0; i < octal.length; i += 3) {
+    let octalDigit = octal.substr(i, 3);
+    let ascii = parseInt(octalDigit, 8);
+    str += String.fromCharCode(ascii);
+  }
+  return str;
+}
+
+// octalToBinary fonksiyonu, bir oktal sayıyı ikili sayıya dönüştürür
+function octalToBinary(octal) {
+  let decimal = parseInt(octal, 8); // önce onluk sayıya dönüştür
+  let binary = decimal.toString(2); // sonra ikili sayıya dönüştür
+  return binary;
+}
+
+// binaryToOctal fonksiyonu, bir ikili sayıyı oktal sayıya dönüştürür
+function binaryToOctal(binary) {
+  let decimal = parseInt(binary, 2); // önce onluk sayıya dönüştür
+  let octal = decimal.toString(8); // sonra oktal sayıya dönüştür
+  return octal;
 }

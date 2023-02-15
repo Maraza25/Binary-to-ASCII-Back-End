@@ -4,18 +4,26 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="web/assets/style.css">
+  <link rel="stylesheet" href="/assets/style.css">
+ 
   <title>Document</title>
 </head>
 <body>
   <form onsubmit="submitForm(event)">
-    <input type="text" name="value" id="value" />
-    <select name="type" id="type">
 
-      <option value="ascii">ASCII to Binary</option>
-      <option value="binary">Binary to ASCII</option>
-  </select>
-  <button></button>
+    <select name="sourceType" id="sourceType">
+
+      <option value="ascii">ASCII</option>
+      <option value="binary">Binary</option>
+      <option value="octal">Octal</option>
+  </select> To
+  <select name="destType" id="destType">
+    <option value="binary">Binary</option>
+    <option value="ascii">ASCII</option>
+    <option value="octal">Octal</option>
+</select> <br>
+    <input type="text" name="value" id="value" />
+    
 
   <button type="submit">Submit</button>
   <button onclick="kopyala()">Copy</button> 
@@ -23,10 +31,12 @@
 
   </form>
   <textarea id="textbox"></textarea>
+
+  
   
 
 
-  <script src="web/assets/script.js"></script>
+  <script src="/assets/script.js"></script>
   
 </body>
 </html>
