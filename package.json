@@ -1,0 +1,22 @@
+{
+  "name": "binary-to-ascii-back-end",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Maraza25/Binary-to-ASCII-Back-End.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Maraza25/Binary-to-ASCII-Back-End/issues"
+  },
+  "homepage": "https://github.com/Maraza25/Binary-to-ASCII-Back-End#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
