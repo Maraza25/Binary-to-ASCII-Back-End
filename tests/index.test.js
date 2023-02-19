@@ -2,36 +2,20 @@ const request = require('supertest');
 const { app, asciiToBinary } = require('../app'); 
 
 describe('asciiToBinary', () => {
-  it('ASCII karakterleri ikilik sayıya doğru bir şekilde dönüştürmelidir', () => {
-    // ASCII karakterlerini ikilik sayılara dönüştürmek için örnek girdiler ve çıktılar tanımlayalım
-    const examples = [
-      ['A', '01000001'],
-      ['B', '01000010'],
-      ['C', '01000011'],
-      ['Z', '01011010'],
-      ['a', '01100001'],
-      ['b', '01100010'],
-      ['c', '01100011'],
-      ['z', '01111010'],
-      ['1', '00110001'],
-      ['2', '00110010'],
-      ['9', '00111001'],
-      [' ', '00100000'],
-      ['!', '00100001'],
-      ['$', '00100100'],
-      ['&', '00100110'],
-      ['@', '01000000'],
-      ['%', '00100101'],
-      ['^', '01011110'],
-      ['*', '00101010'],
-    ];
+  test('basit bir ascii dizesini binarye çevirmesi gerekiyor', () => {
+    expect(asciiToBinary('hello')).toBe('01101000 01100101 01101100 01101100 01101111');
+  });
 
-    // Her örnek girdi için fonksiyonun doğru çıktı verip vermediğini kontrol edelim
-    examples.forEach(([input, expectedOutput]) => {
-      const result = asciiToBinary(input);
-      console.log(`${input}: ${result}`); // cevabı konsola yazdır
-      expect(result).toEqual(expectedOutput);
-    });
+  test('özel karakterler içeren bir ascii dizesini binarye çevirmesi gerekiyor', () => {
+    expect(asciiToBinary('1+1=2')).toBe('00110001 00101011 00110001 00111101 00110010');
+  });
+
+  test('girdi bir dize değilse bir hata mesajı döndürmesi gerekiyor', () => {
+    expect(() => asciiToBinary(123)).toThrow('Girdi bir dize olmalı');
+  });
+
+  test('girdi non-ascii karakterler içeriyorsa bir hata mesajı döndürmesi gerekiyor', () => {
+    expect(() => asciiToBinary('こんにちは')).toThrow('Girdi sadece ASCII karakterlerini içermeli');
   });
 });
 
