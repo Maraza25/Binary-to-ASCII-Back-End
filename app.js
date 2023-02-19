@@ -94,7 +94,7 @@ app.post("/convert", (req, res) => {
 
   // Verileri URL formatına dönüştürün
   const url =
-    "http://localhost:3008/shared?" + querystring.stringify(convertedData);
+    "http://localhost:"+port+"/shared?" + querystring.stringify(convertedData);
 
   // URL'yi konsola yazdırın
   console.log(url);
@@ -107,30 +107,7 @@ app.post("/convert", (req, res) => {
   res.send({ message: message, url: url, body: req.body });
 });
 
-//url ile gelinirse
-app.get("/convert", (req, res) => {
-  sourceType = req.query.sourceType;
-  destType = req.query.destType;
-  value = req.query.value;
 
-  console.log("sourceType:", sourceType);
-  console.log("destType:", destType);
-  console.log("value:", value);
-
-  // dosyalardan index.html'yi bul
-  const filePath = path.join(__dirname, "web", "index.html");
-  fs.readFile(filePath, "utf8", (err, data) => {
-    // dosyayı utf8 ile oku
-    if (err) {
-      console.error(err);
-      res.sendStatus(500);
-      return;
-    }
-
-    // yanıt verisini gönder
-    res.send(data);
-  }); //index.html'yi gönder
-});
 
 function asciiToBinary(str) {
   if (typeof str !== 'string') {
