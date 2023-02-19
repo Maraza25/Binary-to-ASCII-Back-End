@@ -5,7 +5,20 @@ const path = require("path");
 const fs = require("fs");
 const { log } = require("console");
 const app = express();
+const querystring = require("querystring");
+const http = require("http");
+
+const cheerio = require("cheerio"); //html'i ayrıştırma için
+
+const server = http.createServer(app);
+
 const port = 3005;
+
+const filePath = path.join(__dirname, "web", "index.html");
+
+let sourceType;
+let destType;
+let value;
 
 app.use(cors()); //güvenlik için
 app.use(express.json());
@@ -17,12 +30,6 @@ app.use(express.static("web"));
 // urlde herhangi bir istek gelmezse
 app.get("/", (req, res) => {
   //dosyalardan index.html yi bul
-  const filePath = path.join(__dirname, "web", "index.html");
-  /*
-   anonymous function bir giriş argümanı alır işlem yapar ve sonuçlarını döndürür
-  fs.readFile adlı bir fonksiyon çağrıldığında, bu anonymous function verilen filePath yani index.html 
-  dosyasına göre dosyayı okumaya çalışır. 
-  !Eğer dosya okuma işlemi sırasında bir hata oluşursa, err parametresine bu hayatı verir*/
 
   fs.readFile(filePath, "utf8", (err, data) => {
     //dosyayı utf8 ile oku
@@ -39,46 +46,94 @@ app.get("/", (req, res) => {
   });
 });
 
+app.get("/shared", (req, res) => {
+  sourceType = req.query.sourceType;
+  destType = req.query.destType;
+  value = req.query.value;
+
+  fs.readFile(filePath, "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send("An error occurred");
+    }
+
+    const $ = cheerio.load(data);
+    $("#textbox").val(convertMessage(sourceType, destType, value));
+    $("#value").val(value).prop("disabled", true);
+    $("#sourceType").val(sourceType).prop("disabled", true);
+    $("#destType").val(destType).prop("disabled", true);
+
+    const existingDiv = $("div.container"); // Var olan div öğesini seç
+    const newButton = $(
+      "<button class='button' onclick='changePage()'>Try Yourself</button>"
+    ); // Yeni bir button öğesi oluştur
+    existingDiv.append(newButton); // Div öğesinin içine butonu ekle
+
+    const modifiedHtml = $.html();
+    res.send(modifiedHtml);
+  });
+});
+
 //  arkplanda /wsubmit diye istek gönderilirse
 app.post("/convert", (req, res) => {
   //boyd'de value ve type diye tamınlanan verileri konsola yazdır
   console.log(req.body.value);
   console.log(req.body.sourceType);
   console.log(req.body.destType);
+  // Örnek olarak, aldığınız verileri bir değişkene atayalım
+  const sourceType = req.body.sourceType;
+  const destType = req.body.destType;
+  const value = req.body.value;
+
+  // Dönüştürülecek verileri hazırlayın
+  const convertedData = {
+    sourceType: sourceType,
+    destType: destType,
+    value: value,
+  };
+
+  // Verileri URL formatına dönüştürün
+  const url =
+    "http://localhost:3008/shared?" + querystring.stringify(convertedData);
+
+  // URL'yi konsola yazdırın
+  console.log(url);
+
+  console.log(`Gelen verinin tamamı: ${req.body}`);
   //geri dönderilicek mesahın tutulmasın için değişken
-  let message = "";
+  let message = convertMessage(sourceType, destType, value);
 
-  if (req.body.sourceType == "binary" && req.body.destType == "ascii") {
-    message = binaryToAscii(req.body.value).toString();
-  }
-  if (req.body.sourceType == "binary" && req.body.destType == "octal") {
-    message = binaryToOctal(req.body.value).toString();
-  }
-
-  if (req.body.sourceType == "ascii" && req.body.destType == "binary") {
-    message = asciiToBinary(req.body.value).toString();
-  }
-  if (req.body.sourceType == "ascii" && req.body.destType == "octal") {
-    message = asciiToOctal(req.body.value).toString();
-  }
-
-  if (req.body.sourceType == "octal" && req.body.destType == "binary") {
-    message = octalToBinary(req.body.value).toString();
-  }
-  if (req.body.sourceType == "octal" && req.body.destType == "ascii") {
-    message = octalToAscii(req.body.value).toString();
-  }
-
-  //message değişkenini karşı tarafa gönder
-  res.send({ message });
-  //message: "Success!"i karşı tarafa gönder
-  res.send({ message: "Success!" });
+  //message ve url değişkenini karşı tarafa gönder
+  res.send({ message: message, url: url, body: req.body });
 });
 
-//sunucuyu dinlemeye başla
-app.listen(port, () => {
-  //sunucu dinlenmeye başladığında localhos dinleniyor diye console yazdır
-  console.log(`Server listening at http://localhost:${port}`);
+//url ile gelinirse
+app.get("/convert", (req, res) => {
+  sourceType = req.query.sourceType;
+  destType = req.query.destType;
+  value = req.query.value;
+
+  console.log("sourceType:", sourceType);
+  console.log("destType:", destType);
+  console.log("value:", value);
+
+  // dosyalardan index.html'yi bul
+  const filePath = path.join(__dirname, "web", "index.html");
+  fs.readFile(filePath, "utf8", (err, data) => {
+    // dosyayı utf8 ile oku
+    if (err) {
+      console.error(err);
+      res.sendStatus(500);
+      return;
+    }
+
+    // yanıt verisini gönder
+    res.send(data);
+  }); //index.html'yi gönder
+});
+
+app.listen(3000, () => {
+ 
 });
 
 function asciiToBinary(str) {
@@ -134,3 +189,32 @@ function binaryToOctal(binary) {
   let octal = decimal.toString(8); // sonra oktal sayıya dönüştür
   return octal;
 }
+
+function convertMessage(sourceType, destType, value) {
+  let message = "";
+
+  if (sourceType == "binary" && destType == "ascii") {
+    message = binaryToAscii(value).toString();
+  }
+  if (sourceType == "binary" && destType == "octal") {
+    message = binaryToOctal(value).toString();
+  }
+
+  if (sourceType == "ascii" && destType == "binary") {
+    message = asciiToBinary(value).toString();
+  }
+  if (sourceType == "ascii" && destType == "octal") {
+    message = asciiToOctal(value).toString();
+  }
+
+  if (sourceType == "octal" && destType == "binary") {
+    message = octalToBinary(value).toString();
+  }
+  if (sourceType == "octal" && destType == "ascii") {
+    message = octalToAscii(value).toString();
+  }
+
+  return message;
+}
+
+module.exports = app;

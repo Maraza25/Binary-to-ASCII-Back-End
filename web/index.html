@@ -1,45 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/assets/style.css">
- 
+
   <title>Document</title>
 </head>
+
 <body>
   <form onsubmit="submitForm(event)">
 
     <select name="sourceType" id="sourceType">
-
       <option value="ascii">ASCII</option>
       <option value="binary">Binary</option>
       <option value="octal">Octal</option>
-  </select> To
-  <select name="destType" id="destType">
-    <option value="binary">Binary</option>
-    <option value="ascii">ASCII</option>
-    <option value="octal">Octal</option>
-</select> <br>
-    <input type="text" name="value" id="value" />
-    
+    </select> To
+    <select name="destType" id="destType">
+      <option value="binary">Binary</option>
+      <option value="ascii">ASCII</option>
+      <option value="octal">Octal</option>
+    </select> <br>
+    <input type="text" name="value" id="value" oninput="submitForm(event)" />
 
-  <button type="submit">Submit</button>
-  <button onclick="kopyala()">Copy</button> 
+
+
+    <button type="submit">Submit</button>
+    <button onclick="kopyala()">Copy</button>
+    <textarea id="textbox" disabled></textarea>
 
 
   </form>
-  <textarea id="textbox"></textarea>
-
-  
-  
 
 
+  <div class="container mt-5 " style="display: flex; justify-content: center;">
+    <button class="button" id="paylas_button">Share</button>
+  </div>
+
+
+
+
+
+
+
+
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
   <script src="/assets/script.js"></script>
-  
+
 </body>
+
 </html>
-
-
-
