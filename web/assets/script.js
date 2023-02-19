@@ -54,7 +54,7 @@ var text = "Bu içeriği paylaşın";
 var url = "";
 
 if (navigator.share) {
-  paylasButonu.addEventListener("click", function () {
+   function paylasButonu () {
     navigator
       .share({
         title: title,
@@ -63,7 +63,7 @@ if (navigator.share) {
       })
       .then(() => console.log("İçerik paylaşıldı"))
       .catch((err) => console.error("Paylaşım hatası:", err));
-  });
+  }
 } else {
   paylasButonu.style.display = "none";
   console.log("Bu cihazda paylaşım işlemi desteklenmiyor.");
