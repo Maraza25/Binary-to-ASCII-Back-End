@@ -11,7 +11,7 @@ function submitForm(
 
   console.log("Hedef tipi form öğesi değeri: " + destTypeValue);
 
-  fetch("http://localhost:3005/convert", {
+  fetch("http://localhost:3000/convert", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -98,8 +98,6 @@ function changeTextareaValue(value) {
 function changePage() {
   // yeni sayfa için URL oluşturma
   const newUrl = "/";
-
- 
 
   // dosyadaki HTML içeriğini almak için fetch() API'sini kullanma
   fetch("/")

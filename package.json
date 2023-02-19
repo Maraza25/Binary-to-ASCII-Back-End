@@ -2,7 +2,7 @@
   "name": "binary-to-ascii-back-end",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
     "test": "jest --detectOpenHandles"
   },
