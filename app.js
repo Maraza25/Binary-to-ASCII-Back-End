@@ -168,53 +168,120 @@ function asciiToBinary(str) {
   return binary;
 }
 
-
-
-
-
-function binaryToAscii(binary) {
-  let str = "";
-  for (let i = 0; i < binary.length; i += 8) {
-    let binaryDigit = binary.substr(i, 8);
-    let ascii = parseInt(binaryDigit, 2);
-    str += String.fromCharCode(ascii);
+function asciiToOctal(str) {
+  if (typeof str !== 'string') {
+    throw new Error('Girdi bir dize olmalı');
   }
-  return str;
+
+  for (let i = 0; i < str.length; i++) {
+    if (str.charCodeAt(i) > 127) {
+      throw new Error('Girdi sadece ASCII karakterlerini içermeli');
+    }
+  }
+
+  let result = '';
+  for (let i = 0; i < str.length; i++) {
+    const octal = str.charCodeAt(i).toString(8);
+    result += ('000' + octal).slice(-3) + ' ';
+  }
+
+  return result.trim();
 }
 
-function asciiToOctal(str) {
-  let octal = "";
-  for (let i = 0; i < str.length; i++) {
-    let ascii = str.charCodeAt(i);
-    let octalDigit = ascii.toString(8);
-    octal += ("000" + octalDigit).slice(-3); // 3 bitlik tamamlama
+function binaryToAscii(str) {
+  if (typeof str !== 'string') {
+    throw new Error('Girdi bir dize olmalı');
   }
-  return octal;
+
+  const binaryArr = str.split(' ');
+
+  for (let i = 0; i < binaryArr.length; i++) {
+    const binary = binaryArr[i];
+    if (!/^[01]+$/.test(binary)) {
+      throw new Error('Geçersiz binary dizesi');
+    }
+    binaryArr[i] = parseInt(binary, 2);
+  }
+
+  return String.fromCharCode(...binaryArr);
+}
+
+function binaryToOctal(binary) {
+  if (typeof binary !== 'string') {
+    console.log('Girdi bir dize olmalı');
+    throw new Error('Girdi bir dize olmalı');
+  }
+
+  // Girdinin geçerli bir binary dizisi olduğunu kontrol etmek için düzenli ifade kullanıyoruz
+  if (!/^[01 ]+$/.test(binary)) {
+    console.log('Geçersiz binary dizesi');
+    throw new Error('Geçersiz binary dizesi');
+  }
+
+  // Girdiyi boşluk karakterlerinden ayırarak bir diziye dönüştürüyoruz
+  const binaryArray = binary.split(' ');
+
+  // Her binary sayısını ondalık sayıya dönüştürüyoruz
+  const decimalArray = binaryArray.map(binaryStr => parseInt(binaryStr, 2));
+
+  // Her ondalık sayıyı octal sayıya dönüştürüyoruz
+  const octalArray = decimalArray.map(decimal => decimal.toString(8));
+
+  // Octal sayıları birleştirerek sonucu döndürüyoruz
+  return octalArray.join(' ');
 }
 
 function octalToAscii(octal) {
-  let str = "";
-  for (let i = 0; i < octal.length; i += 3) {
-    let octalDigit = octal.substr(i, 3);
-    let ascii = parseInt(octalDigit, 8);
-    str += String.fromCharCode(ascii);
+  if (typeof octal !== 'string') {
+    throw new Error('Girdi bir dize olmalı');
   }
-  return str;
+
+  // Girdinin sadece octal sayılarını içerdiğinden emin oluyoruz
+  if (!/^[0-7 ]+$/.test(octal)) {
+    throw new Error('Geçersiz octal dizesi');
+  }
+
+  // Her octal sayısını ondalık sayıya dönüştürüyoruz
+  const decimalArray = octal.split(' ').map(octalStr => parseInt(octalStr, 8));
+
+  // Her ondalık sayıyı ASCII karakterine dönüştürüyoruz
+  const asciiArray = decimalArray.map(decimal => String.fromCharCode(decimal));
+
+  // ASCII karakterleri birleştirerek sonucu döndürüyoruz
+  return asciiArray.join('');
 }
 
-// octalToBinary fonksiyonu, bir oktal sayıyı ikili sayıya dönüştürür
 function octalToBinary(octal) {
-  let decimal = parseInt(octal, 8); // önce onluk sayıya dönüştür
-  let binary = decimal.toString(2); // sonra ikili sayıya dönüştür
+  if (typeof octal !== 'string') {
+    throw new Error('Girdi bir dize olmalı');
+  }
+  if (!/^[0-7 ]+$/.test(octal)) {
+    throw new Error('Geçersiz octal dizesi');
+  }
+  let binary = '';
+  for (let i = 0; i < octal.length; i++) {
+    if (octal[i] === ' ') {
+      binary += ' ';
+      continue;
+    }
+    let decimal = parseInt(octal[i], 8);
+    let binarySegment = decimal.toString(2);
+    while (binarySegment.length < 3) {
+      binarySegment = '0' + binarySegment;
+    }
+    binary += binarySegment;
+  }
   return binary;
 }
 
-// binaryToOctal fonksiyonu, bir ikili sayıyı oktal sayıya dönüştürür
-function binaryToOctal(binary) {
-  let decimal = parseInt(binary, 2); // önce onluk sayıya dönüştür
-  let octal = decimal.toString(8); // sonra oktal sayıya dönüştür
-  return octal;
-}
+
+
+
+
+
+
+
+
 
 function convertMessage(sourceType, destType, value) {
   let message = "";
