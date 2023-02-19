@@ -1,5 +1,5 @@
-// asciiToBinary.test.js
-const { asciiToBinary } = require('../app');
+const request = require('supertest');
+const { app, asciiToBinary } = require('../app'); 
 
 describe('asciiToBinary', () => {
   it('ASCII karakterleri ikilik sayıya doğru bir şekilde dönüştürmelidir', () => {

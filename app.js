@@ -213,4 +213,13 @@ function convertMessage(sourceType, destType, value) {
   return message;
 }
 
-module.exports = app;
+module.exports = {
+  app,
+  asciiToBinary,
+  binaryToAscii,
+  asciiToOctal,
+  octalToAscii,
+  octalToBinary,
+  binaryToOctal,
+  convertMessage,
+};
