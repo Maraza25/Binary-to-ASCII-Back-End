@@ -12,7 +12,7 @@ const cheerio = require("cheerio"); //html'i ayrıştırma için
 
 const server = http.createServer(app);
 
-const port = 3005;
+const port = 3000;
 
 const filePath = path.join(__dirname, "web", "index.html");
 
@@ -130,10 +130,6 @@ app.get("/convert", (req, res) => {
     // yanıt verisini gönder
     res.send(data);
   }); //index.html'yi gönder
-});
-
-app.listen(3000, () => {
- 
 });
 
 function asciiToBinary(str) {
