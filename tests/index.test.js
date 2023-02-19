@@ -5,8 +5,7 @@ describe("Test the root path", () => {
   test("It should response the GET method", () => 
     request(app)
       .get("/")
-      .then(response => {
-        expect(response.statusCode).toBe(200);
-      })
+      .expect(200)
+      .expect("Content-Type", /html/)
   );
 });
