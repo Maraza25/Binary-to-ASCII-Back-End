@@ -133,14 +133,44 @@ app.get("/convert", (req, res) => {
 });
 
 function asciiToBinary(str) {
-  let binary = "";
-  for (let i = 0; i < str.length; i++) {
-    let ascii = str.charCodeAt(i);
-    let binaryDigit = ascii.toString(2);
-    binary += ("00000000" + binaryDigit).slice(-8); // 8 bitlik tamamlama
+  if (typeof str !== 'string') {
+    throw new Error('Girdi bir dize olmalı');
   }
+
+  // ASCII karakterleri içerip içermediğini kontrol et
+  if (!/^[\x00-\x7F]*$/.test(str)) {
+    throw new Error('Girdi sadece ASCII karakterlerini içermeli');
+  }
+
+  let binary = '';
+  for (let i = 0; i < str.length; i++) {
+    // her karakterin ASCII kodunu bul
+    let ascii = str.charCodeAt(i);
+
+    // ASCII kodunu ikilik sayı sistemine dönüştür
+    let current = '';
+    for (let j = 7; j >= 0; j--) {
+      current += (ascii >> j & 1);
+    }
+
+    binary += current;
+    if (i < str.length - 1) {
+      binary += ''; // iki karakter arasına iki boşluk bırak
+    }
+  }
+
+  // Her ikili sayının arasına tek boşluk bırak
+  binary = binary.replace(/(\d{8})/g, '$1 ');
+
+  // String'in sonundaki boşluğu kaldır
+  binary = binary.trim();
+
   return binary;
 }
+
+
+
+
 
 function binaryToAscii(binary) {
   let str = "";
