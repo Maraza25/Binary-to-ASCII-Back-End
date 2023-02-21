@@ -59,7 +59,10 @@ if (navigator.share) {
       .catch((err) => console.error("Paylaşım hatası:", err));
   }
 } else {
-  paylasButonu.style.display = "none";
+  // TODO: Paylaş butonu varsayılan olarak gizli olsun
+  // öbür türlü sayfa açıldığında kısa bir süreliğine de olsa görünüyor
+  // ve bir anda kayboluyor, hoş bir görüntü değil
+  paylasButonu.style.display = "none"; 
   console.log("Bu cihazda paylaşım işlemi desteklenmiyor.");
 }
 
