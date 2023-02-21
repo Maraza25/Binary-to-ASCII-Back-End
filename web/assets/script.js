@@ -31,12 +31,6 @@ function submitForm(
     .catch((error) => console.error(error));
 }
 
-function kopyala() {
-  var metin = document.getElementById("textbox");
-  metin.sourceType();
-  document.execCommand("copy");
-}
-
 function copyToClipboard(str) {
   navigator.clipboard
     .writeText(str)
