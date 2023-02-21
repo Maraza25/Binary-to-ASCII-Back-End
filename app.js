@@ -94,7 +94,7 @@ app.post("/convert", (req, res) => {
 
   // Verileri URL formatına dönüştürün
   const url =
-    "http://localhost:"+port+"/shared?" + querystring.stringify(convertedData);
+    "http://localhost:" + port + "/shared?" + querystring.stringify(convertedData);
 
   // URL'yi konsola yazdırın
   console.log(url);
@@ -106,8 +106,6 @@ app.post("/convert", (req, res) => {
   //message ve url değişkenini karşı tarafa gönder
   res.send({ message: message, url: url, body: req.body });
 });
-
-
 
 function asciiToBinary(str) {
   if (typeof str !== 'string') {
@@ -250,15 +248,6 @@ function octalToBinary(octal) {
   }
   return binary;
 }
-
-
-
-
-
-
-
-
-
 
 function convertMessage(sourceType, destType, value) {
   let message = "";
