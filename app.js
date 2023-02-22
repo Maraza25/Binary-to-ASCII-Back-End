@@ -41,7 +41,6 @@ app.get("/", (req, res) => {
       res.sendStatus(500);
       return; //fonksiyondan çık
     }
-
   });
 });
 
@@ -51,7 +50,7 @@ app.get("/shared", (req, res) => {
   value = req.query.value;
 
   fs.readFile(filePath, "utf8", (err, data) => {
-    if (err){
+    if (err) {
       console.error(err);
       return res.status(500).send("An error occurred");
     }
@@ -147,37 +146,35 @@ app.post("/convert", (req, res) => {
   res.send(responseBody);
 });
 
-
-
 function asciiToBinary(str) {
-  if (typeof str !== 'string') {
-    throw new Error('Girdi bir dize olmalı');
+  if (typeof str !== "string") {
+    throw new Error("Girdi bir dize olmalı");
   }
 
   // ASCII karakterleri içerip içermediğini kontrol et
   if (!/^[\x00-\x7F]*$/.test(str)) {
-    throw new Error('Girdi sadece ASCII karakterlerini içermeli');
+    throw new Error("Girdi sadece ASCII karakterlerini içermeli");
   }
 
-  let binary = '';
+  let binary = "";
   for (let i = 0; i < str.length; i++) {
     // her karakterin ASCII kodunu bul
     let ascii = str.charCodeAt(i);
 
     // ASCII kodunu ikilik sayı sistemine dönüştür
-    let current = '';
+    let current = "";
     for (let j = 7; j >= 0; j--) {
-      current += (ascii >> j & 1);
+      current += (ascii >> j) & 1;
     }
 
     binary += current;
     if (i < str.length - 1) {
-      binary += ''; // iki karakter arasına iki boşluk bırak
+      binary += ""; // iki karakter arasına iki boşluk bırak
     }
   }
 
   // Her ikili sayının arasına tek boşluk bırak
-  binary = binary.replace(/(\d{8})/g, '$1 ');
+  binary = binary.replace(/(\d{8})/g, "$1 ");
 
   // String'in sonundaki boşluğu kaldır
   binary = binary.trim();
@@ -186,36 +183,36 @@ function asciiToBinary(str) {
 }
 
 function asciiToOctal(str) {
-  if (typeof str !== 'string') {
-    throw new Error('Girdi bir dize olmalı');
+  if (typeof str !== "string") {
+    throw new Error("Girdi bir dize olmalı");
   }
 
   for (let i = 0; i < str.length; i++) {
     if (str.charCodeAt(i) > 127) {
-      throw new Error('Girdi sadece ASCII karakterlerini içermeli');
+      throw new Error("Girdi sadece ASCII karakterlerini içermeli");
     }
   }
 
-  let result = '';
+  let result = "";
   for (let i = 0; i < str.length; i++) {
     const octal = str.charCodeAt(i).toString(8);
-    result += ('000' + octal).slice(-3) + ' ';
+    result += ("000" + octal).slice(-3) + " ";
   }
 
   return result.trim();
 }
 
 function binaryToAscii(str) {
-  if (typeof str !== 'string') {
-    throw new Error('Girdi bir dize olmalı');
+  if (typeof str !== "string") {
+    throw new Error("Girdi bir dize olmalı");
   }
 
-  const binaryArr = str.split(' ');
+  const binaryArr = str.split(" ");
 
   for (let i = 0; i < binaryArr.length; i++) {
     const binary = binaryArr[i];
     if (!/^[01]+$/.test(binary)) {
-      throw new Error('Geçersiz binary dizesi');
+      throw new Error("Geçersiz binary dizesi");
     }
     binaryArr[i] = parseInt(binary, 2);
   }
@@ -224,81 +221,76 @@ function binaryToAscii(str) {
 }
 
 function binaryToOctal(binary) {
-  if (typeof binary !== 'string') {
-    console.log('Girdi bir dize olmalı');
-    throw new Error('Girdi bir dize olmalı');
+  if (typeof binary !== "string") {
+    console.log("Girdi bir dize olmalı");
+    throw new Error("Girdi bir dize olmalı");
   }
 
   // Girdinin geçerli bir binary dizisi olduğunu kontrol etmek için düzenli ifade kullanıyoruz
   if (!/^[01 ]+$/.test(binary)) {
-    console.log('Geçersiz binary dizesi');
-    throw new Error('Geçersiz binary dizesi');
+    console.log("Geçersiz binary dizesi");
+    throw new Error("Geçersiz binary dizesi");
   }
 
   // Girdiyi boşluk karakterlerinden ayırarak bir diziye dönüştürüyoruz
-  const binaryArray = binary.split(' ');
+  const binaryArray = binary.split(" ");
 
   // Her binary sayısını ondalık sayıya dönüştürüyoruz
-  const decimalArray = binaryArray.map(binaryStr => parseInt(binaryStr, 2));
+  const decimalArray = binaryArray.map((binaryStr) => parseInt(binaryStr, 2));
 
   // Her ondalık sayıyı octal sayıya dönüştürüyoruz
-  const octalArray = decimalArray.map(decimal => decimal.toString(8));
+  const octalArray = decimalArray.map((decimal) => decimal.toString(8));
 
   // Octal sayıları birleştirerek sonucu döndürüyoruz
-  return octalArray.join(' ');
+  return octalArray.join(" ");
 }
 
 function octalToAscii(octal) {
-  if (typeof octal !== 'string') {
-    throw new Error('Girdi bir dize olmalı');
+  if (typeof octal !== "string") {
+    throw new Error("Girdi bir dize olmalı");
   }
 
   // Girdinin sadece octal sayılarını içerdiğinden emin oluyoruz
   if (!/^[0-7 ]+$/.test(octal)) {
-    throw new Error('Geçersiz octal dizesi');
+    throw new Error("Geçersiz octal dizesi");
   }
 
   // Her octal sayısını ondalık sayıya dönüştürüyoruz
-  const decimalArray = octal.split(' ').map(octalStr => parseInt(octalStr, 8));
+  const decimalArray = octal
+    .split(" ")
+    .map((octalStr) => parseInt(octalStr, 8));
 
   // Her ondalık sayıyı ASCII karakterine dönüştürüyoruz
-  const asciiArray = decimalArray.map(decimal => String.fromCharCode(decimal));
+  const asciiArray = decimalArray.map((decimal) =>
+    String.fromCharCode(decimal)
+  );
 
   // ASCII karakterleri birleştirerek sonucu döndürüyoruz
-  return asciiArray.join('');
+  return asciiArray.join("");
 }
 
 function octalToBinary(octal) {
-  if (typeof octal !== 'string') {
-    throw new Error('Girdi bir dize olmalı');
+  if (typeof octal !== "string") {
+    throw new Error("Girdi bir dize olmalı");
   }
   if (!/^[0-7 ]+$/.test(octal)) {
-    throw new Error('Geçersiz octal dizesi');
+    throw new Error("Geçersiz octal dizesi");
   }
-  let binary = '';
+  let binary = "";
   for (let i = 0; i < octal.length; i++) {
-    if (octal[i] === ' ') {
-      binary += ' ';
+    if (octal[i] === " ") {
+      binary += " ";
       continue;
     }
     let decimal = parseInt(octal[i], 8);
     let binarySegment = decimal.toString(2);
     while (binarySegment.length < 3) {
-      binarySegment = '0' + binarySegment;
+      binarySegment = "0" + binarySegment;
     }
     binary += binarySegment;
   }
   return binary;
 }
-
-
-
-
-
-
-
-
-
 
 function convertMessage(sourceType, destType, value) {
   let message = "";
