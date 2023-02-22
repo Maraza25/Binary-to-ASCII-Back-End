@@ -42,7 +42,6 @@ app.get("/", (req, res) => {
       return; //fonksiyondan çık
     }
 
-    res.send(data); //index.html yi gönder
   });
 });
 
@@ -52,7 +51,7 @@ app.get("/shared", (req, res) => {
   value = req.query.value;
 
   fs.readFile(filePath, "utf8", (err, data) => {
-    if (err) {
+    if (err){
       console.error(err);
       return res.status(500).send("An error occurred");
     }
@@ -74,37 +73,78 @@ app.get("/shared", (req, res) => {
   });
 });
 
-//  arkplanda /wsubmit diye istek gönderilirse
+// //  arkplanda /wsubmit diye istek gönderilirse
+// app.post("/convert", (req, res) => {
+//   //boyd'de value ve type diye tamınlanan verileri konsola yazdır
+//   console.log(req.body.value);
+//   console.log(req.body.sourceType);
+//   console.log(req.body.destType);
+//   // Örnek olarak, aldığınız verileri bir değişkene atayalım
+//   const sourceType = req.body.sourceType;
+//   const destType = req.body.destType;
+//   const value = req.body.value;
+
+//   // Dönüştürülecek verileri hazırlayın
+//   const convertedData = {
+//     sourceType: sourceType,
+//     destType: destType,
+//     value: value,
+//   };
+
+//   // Verileri URL formatına dönüştürün
+//   const url =
+//     "http://localhost:"+port+"/shared?" + querystring.stringify(convertedData);
+
+//   // URL'yi konsola yazdırın
+//   console.log(url);
+
+//   console.log(`Gelen verinin tamamı: ${req.body}`);
+//   //geri dönderilicek mesahın tutulmasın için değişken
+//   let message = convertMessage(sourceType, destType, value);
+
+//   //message ve url değişkenini karşı tarafa gönder
+//   res.send({ message: message, url: url, body: req.body });
+//   res.status(200)
+// });
+
 app.post("/convert", (req, res) => {
-  //boyd'de value ve type diye tamınlanan verileri konsola yazdır
+  // Request'te yer alan "value", "sourceType" ve "destType" değerlerini konsola yazdır
   console.log(req.body.value);
   console.log(req.body.sourceType);
   console.log(req.body.destType);
-  // Örnek olarak, aldığınız verileri bir değişkene atayalım
+
+  // Request'ten gelen verileri ayrı ayrı değişkenlere atayalım
   const sourceType = req.body.sourceType;
   const destType = req.body.destType;
   const value = req.body.value;
 
-  // Dönüştürülecek verileri hazırlayın
+  // Dönüştürülecek verileri bir obje halinde hazırlayalım
   const convertedData = {
     sourceType: sourceType,
     destType: destType,
     value: value,
   };
 
-  // Verileri URL formatına dönüştürün
-  const url =
-    "http://localhost:"+port+"/shared?" + querystring.stringify(convertedData);
+  // Hazırladığımız verileri URL formatına dönüştürelim
+  const url = `http://localhost:${port}/shared?${querystring.stringify(
+    convertedData
+  )}`;
 
-  // URL'yi konsola yazdırın
+  // Oluşturduğumuz URL'yi konsola yazdıralım
   console.log(url);
 
-  console.log(`Gelen verinin tamamı: ${req.body}`);
-  //geri dönderilicek mesahın tutulmasın için değişken
-  let message = convertMessage(sourceType, destType, value);
+  // Response olarak gönderilecek mesajı bir değişkene atayalım
+  const message = convertMessage(sourceType, destType, value);
 
-  //message ve url değişkenini karşı tarafa gönder
-  res.send({ message: message, url: url, body: req.body });
+  // Response olarak gönderilecek verileri bir obje halinde hazırlayalım
+  const responseBody = {
+    message: message,
+    url: url,
+    body: req.body,
+  };
+
+  // Response olarak hazırladığımız verileri gönderelim
+  res.send(responseBody);
 });
 
 
