@@ -6,6 +6,12 @@ const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 const querystring = require('querystring');
+const chaiHttp = require('chai-http');
+const mock = require('mock-fs');
+
+
+chai.use(chaiHttp);
+
 
 // test kodu buraya gelecek
 
@@ -13,8 +19,64 @@ const querystring = require('querystring');
 sinon.useFakeTimers();
 
 
+const index_html=`<!DOCTYPE html>
+ <html lang="en">
+ 
+ <head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link rel="stylesheet" href="/assets/style.css">
+ 
+   <title>Document</title>
+ </head>
+ 
+ <body>
+   <form onsubmit="submitForm(event)">
+ 
+     <select name="sourceType" id="sourceType">
+       <option value="ascii">ASCII</option>
+       <option value="binary">Binary</option>
+       <option value="octal">Octal</option>
+     </select> To
+     <select name="destType" id="destType">
+       <option value="binary">Binary</option>
+       <option value="ascii">ASCII</option>
+       <option value="octal">Octal</option>
+     </select> <br>
+     <input type="text" name="value" id="value" />
+ 
+ 
+ 
+     <button type="submit">Submit</button>
+     <button onclick="kopyala()">Copy</button>
+     <textarea id="textbox" disabled></textarea>
+ 
+ 
+   </form>
+ 
+ 
+   <div class="container mt-5 " style="display: flex; justify-content: center;">
+     <button class="button" onclick="paylasButonu()" id="paylas_button">Share</button>
+   </div>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+   <script src="/assets/script.js"></script>
+ 
+ </body>
+ 
+  </html>`
 
-const { app, asciiToBinary, binaryToAscii, asciiToOctal, binaryToOctal, octalToAscii, octalToBinary } = require('../app'); 
+
+
+const { app, asciiToBinary, binaryToAscii, asciiToOctal, binaryToOctal, octalToAscii, octalToBinary,convertMessage } = require('../app'); 
 
 describe('asciiToBinary', () => {
   test('basit bir ascii dizesini binarye çevirmesi gerekiyor', () => {
@@ -124,38 +186,189 @@ describe('octalToBinary', () => {
   });
 });
 
+describe("convertMessage function", () => {
+  it("should convert binary to octal", () => {
+    const sourceType = "binary";
+    const destType = "octal";
+    const value = "101110";
+
+    const expected = "56";
+    const result = convertMessage(sourceType, destType, value);
+
+    expect(result).to.equal(expected);
+  });
+
+  it("should convert ascii to octal", () => {
+    const sourceType = "ascii";
+    const destType = "octal";
+    const value = "hello";
+
+    const expected = "150 145 154 154 157";
+    const result = convertMessage(sourceType, destType, value);
+
+    expect(result).to.equal(expected);
+  });
+
+  it("should convert octal to binary", () => {
+    const sourceType = "octal";
+    const destType = "binary";
+    const value = "56";
+
+    const expected = "101110";
+    const result = convertMessage(sourceType, destType, value);
+
+    expect(result).to.equal(expected);
+  });
+
+  it("should convert octal to ascii", () => {
+    const sourceType = "octal";
+    const destType = "ascii";
+    const value = "150 145 154 154 157";
+
+    const expected = "hello";
+    const result = convertMessage(sourceType, destType, value);
+
+    expect(result).to.equal(expected);
+  });
+
+  it("should convert ascii to binary", () => {
+    const sourceType = "ascii";
+    const destType = "binary";
+    const value = "hello";
+
+    const expected = "01101000 01100101 01101100 01101100 01101111";
+    const result = convertMessage(sourceType, destType, value);
+
+    expect(result).to.equal(expected);
+  });
+
+  it("should convert binary to ascii", () => {
+    const sourceType = "binary";
+    const destType = "ascii";
+    const value = "01101000 01100101 01101100 01101100 01101111";
+
+    const expected = "hello";
+    const result = convertMessage(sourceType, destType, value);
+
+    expect(result).to.equal(expected);
+  });
+});
+
+  
 
 
 
-// const mock = require('mock-fs');
+describe('GET /', () => {
+  beforeEach(() => {
+    mock({
+      '/path/to/wrong/file.html': 'file content',
+    });
+  });
 
-// describe('GET /', () => {
-//   beforeEach(() => {
-//     mock({
-//       '/path/to/wrong/file.html': 'file content',
-//     });
-//   });
+  afterEach(() => {
+    mock.restore();
+  });
 
-//   afterEach(() => {
-//     mock.restore();
-//   });
+  it('hatalı dosya yolu girildiğinde Internal Server Error döndürmeli', (done) => {
+    const wrongFilePath = '/path/to/wrong/file.html';
+    const readFileStub = sinon.stub(fs, 'readFile').callsFake((path, options, callback) => {
+      callback(new Error('Dosya bulunamadı'), null);
+    });
 
-//   it('hatalı dosya yolu girildiğinde Internal Server Error döndürmeli', (done) => {
-//     const wrongFilePath = '/path/to/wrong/file.html';
-//     const readFileStub = sinon.stub(fs, 'readFile').callsFake((path, options, callback) => {
-//       callback(new Error('Dosya bulunamadı'), null);
-//     });
+    request(app)
+      .get('/')
+      .expect(500)
+      .end((err, res) => {
+        expect(readFileStub.calledOnce).to.be.true;
+        readFileStub.restore();
+        done(err);
+      });
+  });
 
-//     request(app)
-//       .get('/')
-//       .expect(500)
-//       .end((err, res) => {
-//         expect(readFileStub.calledOnce).to.be.true;
-//         readFileStub.restore();
-//         done(err);
-//       });
-//   });
-// });
+
+});
+
+describe('GET /shared', () => {
+  beforeEach(() => {
+    mock({
+      '/path/to/wrong/file.html': 'file content',
+    });
+  });
+
+  afterEach(() => {
+    mock.restore();
+  });
+
+  it('hatalı dosya yolu girildiğinde Internal Server Error döndürmeli', (done) => {
+    const wrongFilePath = '/path/to/wrong/file.html';
+    const readFileStub = sinon.stub(fs, 'readFile').callsFake((path, options, callback) => {
+      callback(new Error('Dosya bulunamadı'), null);
+    });
+
+    request(app)
+      .get('/shared')
+      .expect(500)
+      .end((err, res) => {
+        expect(readFileStub.calledOnce).to.be.true;
+        readFileStub.restore();
+        done(err);
+      });
+  });
+
+
+});
+
+describe('POST /convert', () => {
+  it('should return 200 OK and response body should match expected values', async () => {
+    const requestBody = {
+      sourceType: 'ascii',
+      destType: 'binary',
+      value: 'hello'
+    };
+    const expectedResponseBody = '01101000 01100101 01101100 01101100 01101111'
+
+    const response = await request(app)
+      .post('/convert')
+      .send(requestBody);
+
+    expect(response.statusCode).to.equal(200);
+    expect(response.body.message).to.eql(expectedResponseBody);
+  });
+
+  it('should log the expected values to the console', async () => {
+    const consoleLog = jest.spyOn(console, 'log').mockImplementation();
+
+    const requestBody = {
+      sourceType: 'ascii',
+      destType: 'binary',
+      value: 'hello'
+    };
+    const expectedConsoleLog = 'hello';//gelen veri
+
+    await request(app)
+      .post('/convert')
+      .send(requestBody);
+
+    expect(consoleLog.mock.calls[0][0]).to.equal(expectedConsoleLog);
+    consoleLog.mockRestore();
+  });
+});
+
+describe("GET /shared", () => {
+  it("should return 200 OK and modified HTML page", async () => {
+    const sourceType = "ascii";
+    const destType = "binary";
+    const value = "hello";
+    const expectedButtonText = "Try Yourself";
+    
+    const response = await request(app)
+      .get(`/shared?sourceType=${sourceType}&destType=${destType}&value=${value}`)
+    
+    expect(response.statusCode).to.equal(200);
+    expect(response.text).to.contain(convertMessage(sourceType, destType, value));
+    expect(response.text).to.contain(`value="${value}" disabled`);
+  });
+});
 
 
 
@@ -170,6 +383,43 @@ describe("Test the root path", () => {
       .expect(200)
       .expect("Content-Type", /html/)
   );
+});
+
+describe("POST /convert", () => {
+  it("should return 200 OK and response body should match expected values", async () => {
+    const requestBody = { sourceType: "ascii", destType: "binary", value: "hello" };
+    const expectedResponseBody = {
+      message: "01101000 01100101 01101100 01101100 01101111",
+      url: "http://localhost:3000/shared?sourceType=ascii&destType=binary&value=hello",
+      body: requestBody,
+    };
+
+    const response = await request(app)
+      .post("/convert")
+      .send(requestBody);
+
+    expect(response.body).to.deep.equal(expectedResponseBody);
+  });
+
+  // it("should log the expected values to the console", async () => {
+  //   const consoleLog = jest.spyOn(console, "log");
+
+  //   const requestBody = { sourceType: "ascii", destType: "binary", value: "hello" };
+  //   const expectedConsoleLog = [
+  //     requestBody.value.toString(),
+  //     requestBody.sourceType,
+  //     requestBody.destType,
+  //     "http://localhost:3000/shared?sourceType=ascii&destType=binary&value=hello",
+      
+  //   ];
+
+  //   await request(app)
+  //     .post("/convert")
+  //     .send(requestBody);
+
+  //   expect(consoleLog.mock.calls[0]).to.equal(expectedConsoleLog);
+  //   consoleLog.mockRestore();
+  // });
 });
 
 
