@@ -31,7 +31,7 @@ function submitForm(
     .catch((error) => console.error(error));
 }
 
-function copyToClipboard(str) {
+function copyToClipboard(str=document.getElementById("textbox").value) {
   navigator.clipboard
     .writeText(str)
     .then(() => {
