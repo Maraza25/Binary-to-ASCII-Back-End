@@ -1,12 +1,11 @@
 //Kütüphaneler
-const express = require("express");
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
-const { log } = require("console");
 const app = express();
-const querystring = require("querystring");
 const http = require("http");
+
 
 const cheerio = require("cheerio"); //html'i ayrıştırma için
 
@@ -15,10 +14,6 @@ const server = http.createServer(app);
 const port = 3000;
 
 const filePath = path.join(__dirname, "web", "index.html");
-
-let sourceType;
-let destType;
-let value;
 
 app.use(cors()); //güvenlik için
 app.use(express.json());
@@ -45,19 +40,42 @@ app.get("/", (req, res) => {
 });
 
 app.get("/shared", (req, res) => {
-  sourceType = req.query.sourceType;
-  destType = req.query.destType;
-  value = req.query.value;
+
+  
+  let converted
+  const sourceType = req.query.sourceType;
+  const destType = req.query.destType;
+  const value = req.query.value;
+
+  const data = {
+    sourceType: sourceType,
+    destType: destType,
+    value: value
+  };
+
+
+  fetch("http://127.0.0.1:6027/convert", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      converted = data.message;
+      console.log(converted);
+    })
+    .catch((error) => console.error(error));
 
   fs.readFile(filePath, "utf8", (err, data) => {
     if (err) {
       console.error(err);
       return res.status(500).send("An error occurred");
     }
-    
 
     const $ = cheerio.load(data);
-    $("#textbox").val(convertMessage(sourceType, destType, value));
+    $("#textbox").val(converted);
     $("#value").val(value).prop("disabled", true);
     $("#sourceType").val(sourceType).prop("disabled", true);
     $("#destType").val(destType).prop("disabled", true);
@@ -73,5 +91,10 @@ app.get("/shared", (req, res) => {
   });
 });
 
+app.use(function(req, res, next) {
+  res.status(404).send("404 Page Not Found");
+  next();
+});
 
-module.exports = { app }
+
+module.exports = { app };
