@@ -1,3 +1,5 @@
+var url;
+
 function submitForm(
   event,
   value = document.querySelector("#value").value,
@@ -5,13 +7,22 @@ function submitForm(
   destTypeValue = document.getElementById("destType").value
 ) {
   event.preventDefault();
+
+  const params = new URLSearchParams();
+  params.append("sourceType", sourceTypeValue);
+  params.append("destType", destTypeValue);
+  params.append("value", value);
+
+  url = "http://localhost:3000/shared?" + params.toString(); //
+  console.log(url);
+
   document.querySelector("#value").value = value;
 
   console.log("Kaynak tipi form öğesi değeri: " + sourceTypeValue);
 
   console.log("Hedef tipi form öğesi değeri: " + destTypeValue);
 
-  fetch("http://localhost:3000/convert", {
+  fetch("http://localhost:6027/convert", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -26,12 +37,11 @@ function submitForm(
     .then((data) => {
       console.log(data);
       changeTextareaValue(data.message);
-      url = data.url;
     })
     .catch((error) => console.error(error));
 }
 
-function copyToClipboard(str=document.getElementById("textbox").value) {
+function copyToClipboard(str = document.getElementById("textbox").value) {
   navigator.clipboard
     .writeText(str)
     .then(() => {
@@ -45,10 +55,9 @@ function copyToClipboard(str=document.getElementById("textbox").value) {
 var paylasButonu = document.getElementById("paylas_button");
 var title = "Paylaşılacak İçerik";
 var text = "Bu içeriği paylaşın";
-var url = "";
 
 if (navigator.share) {
-   function paylasButonu () {
+  function paylasButonu() {
     navigator
       .share({
         title: title,
@@ -62,7 +71,7 @@ if (navigator.share) {
   // TODO: Paylaş butonu varsayılan olarak gizli olsun
   // öbür türlü sayfa açıldığında kısa bir süreliğine de olsa görünüyor
   // ve bir anda kayboluyor, hoş bir görüntü değil
-  paylasButonu.style.display = "none"; 
+  paylasButonu.style.display = "none";
   console.log("Bu cihazda paylaşım işlemi desteklenmiyor.");
 }
 
@@ -102,6 +111,11 @@ function changePage() {
     .then((html) => {
       // yeni URL'yi ve HTML içeriğini tarayıcı geçmişine ekleyerek sayfayı değiştirme
       window.history.pushState({}, "", newUrl);
-      document.documentElement.innerHTML = html;
+      document.getElementsByTagName('body')[0].innerHTML = html.substring(
+          html.indexOf("<body>"),
+          html.indexOf("</body>")
+        );
+
+
     });
 }
